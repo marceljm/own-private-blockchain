@@ -78,15 +78,16 @@ class Blockchain {
                 // block hash
                 block.hash = SHA256(JSON.stringify(block)).toString();
 
-                // validate (question: should the whole chain be validated for every new block?)
+                // add block
+                self.chain.push(block);
+                self.height += 1;
+
+                // validate
                 let errors = await self.validateChain();
                 if (errors.length) {
-                    reject(Error(errors));
+                    resolve(Error(errors));
                 }
                 else {
-                    // add block
-                    self.chain.push(block);
-                    self.height += 1;
                     resolve(block);
                 }
             } catch (error) {
@@ -142,7 +143,7 @@ class Blockchain {
                     if (bitcoinMessage.verify(message, address, signature)) {
                         // create and add the block
                         let block = new BlockClass.Block({ data: { "owner": address, "star": star } });
-                        self._addBlock(block);
+                        await self._addBlock(block);
 
                         resolve(block);
                     }
