@@ -49,6 +49,7 @@ class ApplicationServer {
 		let self = this;
 		this.app.listen(this.app.get("port"), () => {
 			console.log(`Server Listening for port: ${self.app.get("port")}`);
+			console.log('Fixing SSL issue: export NODE_OPTIONS=--openssl-legacy-provider');
 		});
 	}
 

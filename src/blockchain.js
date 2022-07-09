@@ -78,11 +78,17 @@ class Blockchain {
                 // block hash
                 block.hash = SHA256(JSON.stringify(block)).toString();
 
-                // add block
-                self.chain.push(block);
-                self.height += 1;
-
-                resolve(block);
+                // validate (question: should the whole chain be validated for every new block?)
+                let errors = await self.validateChain();
+                if (errors.length) {
+                    reject(Error(errors));
+                }
+                else {
+                    // add block
+                    self.chain.push(block);
+                    self.height += 1;
+                    resolve(block);
+                }
             } catch (error) {
                 reject(Error(error));
             }
@@ -216,17 +222,23 @@ class Blockchain {
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
             let i = 0;
+
             for (var block of self.chain) {
-                if (!block.validate())
+                let isValid = await block.validate();
+                if (!isValid)
                     errorLog.push(`Block #${block.height}: invalid hash`);
 
-                if (i == 0)
+                if (i == 0) {
+                    i += 1;
                     continue;
+                }
 
                 if (block.previousBlockHash != self.chain[i - 1].hash)
                     errorLog.push(`Block #${block.height}: invalid previous block hash`);
+
+                i += 1;
             }
-            resolve(Error(errorLog));
+            resolve(errorLog);
         });
     }
 

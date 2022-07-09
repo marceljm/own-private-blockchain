@@ -41,11 +41,15 @@ class Block {
             // Save in auxiliary variable the current block hash
             let aux = self.hash;
 
+            // Clone block and remove hash
+            const clone = structuredClone(self);
+            clone.hash = null;
+
             // Recalculate the hash of the Block
-            self.hash = SHA256(JSON.stringify(self)).toString();
+            let recalculated = SHA256(JSON.stringify(clone)).toString();
 
             // Comparing if the hashes changed
-            if (aux != self.hash) {
+            if (aux != recalculated) {
                 // Returning the Block is not valid
                 resolve(false);
             }
